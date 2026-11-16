@@ -4,53 +4,60 @@ import { prisma } from "../../lib/prisma";
 // import { prisma } from "../../lib/prisma";
 
 interface IRegisterPatientPayload {
-    name: string,
-    email: string,
-    password: string,
+  name: string;
+  email: string;
+  password: string;
 }
-const registerPatient = async (payload: IRegisterPatientPayload)=>{
-    const { name, email, password } = payload;
+const registerPatient = async (payload: IRegisterPatientPayload) => {
+  const { name, email, password } = payload;
 
-    const data = await auth.api.signUpEmail({
-        body:{
-            name,
-            email,
-            password
-        }
-    })
+  const data = await auth.api.signUpEmail({
+    body: {
+      name,
+      email,
+      password,
+    },
+  });
 
-    if(!data.user){
-        throw new Error("User registration failed");
-    }
+  if (!data.user) {
+    throw new Error("User registration failed");
+  }
 
-    // TODO: Implement the logic to create a patient record in the database using Prisma
-    const patient = await prisma.$transaction(async (tx)=>{
-       const result = await tx.patient.create({
-            data:{
-                userId: data.user.id,
-                name,
-                email,
-            }
-        })
+  // TODO: Implement the logic to create a patient record in the database using Prisma
+  try {
+    const patient = await prisma.$transaction(async (tx) => {
+      const result = await tx.patient.create({
+        data: {
+          userId: data.user.id,
+          name,
+          email,
+        },
+      });
 
-        return result;
-    })
+      return result;
+    });
 
     return {
-        ...data,
-        patient
-    }
-}
+      ...data,
+      patient,
+    };
+  } catch (error) {
+    console.log(error);
+    await prisma.user.delete({
+      where: {
+        id: data.user.id,
+      },
+    });
+    throw error;
+  }
+};
 
 interface ILoginUserPayload {
-    email: string,
-    password: string,
+  email: string;
+  password: string;
 }
 
-const loginUser = async (
-  payload: ILoginUserPayload,
-  headers: Headers
-) => {
+const loginUser = async (payload: ILoginUserPayload, headers: Headers) => {
   const { email, password } = payload;
 
   const response = await auth.api.signInEmail({
@@ -82,7 +89,7 @@ const loginUser = async (
   };
 };
 
-export const authService ={
-    registerPatient,
-    loginUser
-}
+export const authService = {
+  registerPatient,
+  loginUser,
+};

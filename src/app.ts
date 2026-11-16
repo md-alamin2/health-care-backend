@@ -1,5 +1,8 @@
-import express, { Application, Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import express, { Application, NextFunction, Request, Response } from "express";
 import { indexRoute } from "./app/routes";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+import { notFound } from "./app/middleware/notFound";
 
 const app: Application = express();
 
@@ -16,5 +19,8 @@ app.use("/api/v1", indexRoute);
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, TypeScript + Express!');
 });
+
+app.use(globalErrorHandler)
+app.use(notFound)
 
 export default app
