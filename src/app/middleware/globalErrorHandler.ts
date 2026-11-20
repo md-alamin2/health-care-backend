@@ -6,8 +6,7 @@ import status from "http-status";
 import z from "zod";
 import { TErrorResponse, TErrorSource } from "../interfaces/error.interface";
 import { handleZodError } from "../errorHelpers/handleZodError";
-
-
+import AppError from "../errorHelpers/AppError";
 
 export const globalErrorHandler = (
   err: any,
@@ -16,26 +15,48 @@ export const globalErrorHandler = (
   next: NextFunction,
 ) => {
   if (envVars.NODE_ENV === "development") {
-    console.log("Error form global error handler",err);
+    console.log("Error form global error handler", err);
   }
 
-  let errorSources: TErrorSource[] = []
-  let statusCode : number = status.INTERNAL_SERVER_ERROR
+  let errorSources: TErrorSource[] = [];
+  let statusCode: number = status.INTERNAL_SERVER_ERROR;
   let message: string = "Internal server Error";
+  let stack: string | undefined = undefined;
 
-  if(err instanceof z.ZodError){
-    const simplifiedError = handleZodError(err)
-    statusCode = simplifiedError.statusCode as number
-    message = simplifiedError.message
-    errorSources=[...simplifiedError.errorSources]
+  if (err instanceof z.ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError.statusCode as number;
+    message = simplifiedError.message;
+    errorSources = [...simplifiedError.errorSources];
+  } else if (err instanceof AppError) {
+    statusCode = status.INTERNAL_SERVER_ERROR;
+    message = err.message;
+    stack = err.stack;
+    errorSources = [
+      {
+        path: "",
+        message: err.message,
+      },
+    ];
+  } else if (err instanceof Error) {
+    statusCode = status.INTERNAL_SERVER_ERROR;
+    message = err.message;
+    stack = err.stack;
+    errorSources = [
+      {
+        path: "",
+        message: err.message,
+      },
+    ];
   }
 
-  const errResponse : TErrorResponse = {
+  const errResponse: TErrorResponse = {
     success: false,
     message: message,
     errorSources,
-    error: envVars.NODE_ENV === "development"? err.message : undefined
-  }
+    stack: envVars.NODE_ENV === "development" ? stack : undefined,
+    error: envVars.NODE_ENV === "development" ? err.message : undefined,
+  };
 
   res.status(statusCode).json(errResponse);
 };

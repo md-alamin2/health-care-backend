@@ -2,7 +2,7 @@ import status from "http-status";
 import z from "zod";
 import { TErrorResponse, TErrorSource } from "../interfaces/error.interface";
 
-export const handleZodError = (err: z.ZodError):TErrorResponse => {
+export const handleZodError = (err: z.ZodError): TErrorResponse => {
   const statusCode = status.BAD_REQUEST;
   const message = "Zod validation error";
   const errorSources: TErrorSource[] = [];
@@ -14,10 +14,10 @@ export const handleZodError = (err: z.ZodError):TErrorResponse => {
     });
   });
 
-  return{
+  return {
     statusCode,
     success: false,
     message,
     errorSources,
-  }
+  };
 };
