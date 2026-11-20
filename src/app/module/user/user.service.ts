@@ -6,7 +6,7 @@ import { ICreateDoctorPayload } from "./user.interface";
 const createDoctor = async (payload: ICreateDoctorPayload) => {
   const specialties: Specialty[] = [];
 
-  for (const specialtyId of payload.specialty) {
+  for (const specialtyId of payload.specialties) {
     const specialty = await prisma.specialty.findUnique({
       where: {
         id: specialtyId,
@@ -46,18 +46,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
       const doctorData = await tx.doctor.create({
         data: {
           userId: userData.user.id,
-          name: payload.doctor.name,
-          email: payload.doctor.email,
-          profilePhoto: payload.doctor.profilePhoto,
-          contactNumber: payload.doctor.contactNumber,
-          address: payload.doctor.address,
-          registrationNumber: payload.doctor.registrationNumber,
-          experience: payload.doctor.experience,
-          gender: payload.doctor.gender,
-          appointmentFee: payload.doctor.appointmentFee,
-          qualification: payload.doctor.qualification,
-          currentWorkingPlace: payload.doctor.currentlyWorkingPlace,
-          designation: payload.doctor.designation,
+          ...payload.doctor
         },
       });
 

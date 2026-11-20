@@ -1,0 +1,52 @@
+import z from "zod";
+import { Gender } from "../../../generated/prisma/enums";
+
+export const createDoctorZodSchema = z.object({
+  password: z
+    .string("Password is required and must be a string")
+    .min(8, "Password must be at least 8 characters")
+    .max(30, "Password must be at most 30 characters"),
+  doctor: z.object({
+    name: z
+      .string("Name is required and must be string")
+      .min(3, "Name must be at least 3 characters")
+      .max(30, "Name must be at most 30 characters"),
+    email: z.email("Invalid email address"),
+    contactNumber: z
+      .string("Contact number is required")
+      .min(11, "Contact number must be at least 11 characters")
+      .max(14, "Contact number must be at most 14 characters"),
+    address: z
+      .string("Address is required")
+      .min(10, "Address must be at least 10 characters")
+      .max(100, "Address must be at most 100 characters")
+      .optional(),
+    registrationNumber: z.string("Registration number is required"),
+    experience: z
+      .int("Experience must be an integer")
+      .nonnegative("Experience cannot be negative")
+      .optional(),
+    gender: z.enum(
+      [Gender.FEMALE, Gender.MALE],
+      "Gender must be either MALE or FEMALE",
+    ),
+    appointmentFee: z
+      .number("Appointment fee must be a number")
+      .nonnegative("Appointment fee cannot be negative"),
+    qualification: z
+      .string("Qualification is required")
+      .min(2, "Qualification must be at least 2 characters")
+      .max(50, "Qualification must be at most 50 characters"),
+    currentWorkingPlace: z
+      .string("Current working place is required")
+      .min(2, "Current working place must be at least 2 characters")
+      .max(50, "Current working place must be at most 50 characters"),
+    designation: z
+      .string("Designation is required")
+      .min(2, "Designation must be at least 2 characters")
+      .max(30, "Designation must be at most 30 characters"),
+  }),
+  specialties: z
+    .array(z.uuid(), "Specialties must be an array of string")
+    .min(1, "At least one specialty is required"),
+});

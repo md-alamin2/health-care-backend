@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
-import { envVars } from "../../config/env";
+import { envVars } from "../config/env";
 import status from "http-status";
+import z from "zod";
+import { TErrorResponse, TErrorSource } from "../interfaces/error.interface";
+import { handleZodError } from "../errorHelpers/handleZodError";
+
+
 
 export const globalErrorHandler = (
   err: any,
@@ -14,12 +19,23 @@ export const globalErrorHandler = (
     console.log("Error form global error handler",err);
   }
 
+  let errorSources: TErrorSource[] = []
   let statusCode : number = status.INTERNAL_SERVER_ERROR
-  let message: string = "Internal server Error"
+  let message: string = "Internal server Error";
 
-  res.status(statusCode).json({
+  if(err instanceof z.ZodError){
+    const simplifiedError = handleZodError(err)
+    statusCode = simplifiedError.statusCode as number
+    message = simplifiedError.message
+    errorSources=[...simplifiedError.errorSources]
+  }
+
+  const errResponse : TErrorResponse = {
     success: false,
     message: message,
-    error: err.message,
-  });
+    errorSources,
+    error: envVars.NODE_ENV === "development"? err.message : undefined
+  }
+
+  res.status(statusCode).json(errResponse);
 };
