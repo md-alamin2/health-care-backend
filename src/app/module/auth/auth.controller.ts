@@ -14,24 +14,14 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const loginUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await authService.loginUser(
-    req.body,
-    new Headers(req.headers as HeadersInit)
-  );
-
-  const setCookie = result.headers.get("set-cookie");
-
-  if (setCookie) {
-    res.setHeader("Set-Cookie", setCookie);
-  }
+  const result = await authService.loginUser(req.body);
 
   sendResponse(res, {
     httpStatusCode: 200,
     success: true,
     message: "User logged in successfully",
-    data: result.data,
+    data: result,
   });
 });
 
