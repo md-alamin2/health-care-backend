@@ -42,7 +42,29 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
       return result;
     });
 
+    const accessToken = tokenUtils.getAccessToken({
+      userId: data.user.id,
+      role: data.user.role,
+      name: data.user.name,
+      email: data.user.email,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
+
+    const refreshToken = tokenUtils.getRefreshToken({
+      userId: data.user.id,
+      role: data.user.role,
+      name: data.user.name,
+      email: data.user.email,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
+
     return {
+      accessToken,
+      refreshToken,
       ...data,
       patient,
     };
@@ -81,29 +103,29 @@ const loginUser = async (payload: ILoginUserPayload) => {
 
   const accessToken = tokenUtils.getAccessToken({
     userId: data.user.id,
-    role:data.user.role,
-    name:data.user.name,
-    email:data.user.email,
-    status:data.user.status,
-    isDeleted:data.user.isDeleted,
-    emailVerified:data.user.emailVerified
-  })
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
 
   const refreshToken = tokenUtils.getRefreshToken({
     userId: data.user.id,
-    role:data.user.role,
-    name:data.user.name,
-    email:data.user.email,
-    status:data.user.status,
-    isDeleted:data.user.isDeleted,
-    emailVerified:data.user.emailVerified
-  })
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
 
   return {
     ...data,
     accessToken,
-    refreshToken
-  }
+    refreshToken,
+  };
 };
 
 export const authService = {
