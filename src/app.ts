@@ -3,6 +3,7 @@ import express, { Application, Request, Response } from "express";
 import { indexRoute } from "./app/routes";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -11,6 +12,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Middleware to parse cookie
+app.use(cookieParser())
 
 // Mount the indexRoute at the "/api/v1" path
 app.use("/api/v1", indexRoute);
