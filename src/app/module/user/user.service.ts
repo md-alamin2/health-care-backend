@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import { Role, Specialty } from "../../../generated/prisma/browser";
 import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ICreateDoctorPayload } from "./user.interface";
+import { ICreateAdmin, ICreateDoctorPayload } from "./user.interface";
 
 const createDoctor = async (payload: ICreateDoctorPayload) => {
   const specialties: Specialty[] = [];
@@ -16,7 +17,10 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
     });
 
     if (!specialty) {
-      throw new AppError(status.NOT_FOUND, `Specialty with id ${specialtyId} not found`);
+      throw new AppError(
+        status.NOT_FOUND,
+        `Specialty with id ${specialtyId} not found`,
+      );
     }
     specialties.push(specialty);
   }
@@ -29,7 +33,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   });
 
   if (userExists) {
-    throw new AppError(status.CONFLICT,"User with this email already exists");
+    throw new AppError(status.CONFLICT, "User with this email already exists");
   }
 
   //   create user
@@ -48,7 +52,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
       const doctorData = await tx.doctor.create({
         data: {
           userId: userData.user.id,
-          ...payload.doctor
+          ...payload.doctor,
         },
       });
 
@@ -126,7 +130,82 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   }
 };
 
+const createAdmin = async (payload: ICreateAdmin) => {
+  // Step 1: Check if user already exists
+  const userExists = await prisma.user.findUnique({
+    where: {
+      email: payload.admin.email,
+    },
+  });
+
+  if (userExists) {
+    throw new AppError(status.CONFLICT, "User already exist with this email");
+  }
+
+  // Step 2: Create user account with Better Auth
+  const userData = await auth.api.signUpEmail({
+    body: {
+      email: payload.admin.email,
+      password: payload.password,
+      role: Role.ADMIN,
+      name: payload.admin.name,
+      needPasswordChange: true,
+      rememberMe: false,
+    },
+  });
+
+  // Step 3: Create admin profile in transaction
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // create admin
+      const admin = await tx.admin.create({
+        data: {
+          userId: userData.user.id,
+          name: userData.user.name,
+          email: userData.user.email,
+          profilePhoto: payload.admin.profilePhoto,
+          contactNumber: payload.admin.contactNumber,
+        },
+      });
+
+      // Fetch created admin with user data
+      const createdAdmin = await tx.admin.findUnique({
+        where: { id: admin.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profilePhoto: true,
+          contactNumber: true,
+          isDeleted: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      return createdAdmin;
+    });
+
+    return result;
+  } catch (error: any) {
+    // Cleanup: Delete user if admin creation fails
+    await prisma.user.delete({
+      where: { id: userData.user.id },
+    });
+    throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to create admin");
+  }
+};
 
 export const userService = {
-    createDoctor
-}
+  createDoctor,
+  createAdmin,
+};

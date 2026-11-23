@@ -405,7 +405,8 @@ export const ModelName = {
   Doctor: 'Doctor',
   Patient: 'Patient',
   Specialty: 'Specialty',
-  DoctorSpecialty: 'DoctorSpecialty'
+  DoctorSpecialty: 'DoctorSpecialty',
+  SuperAdmin: 'SuperAdmin'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "admin" | "user" | "session" | "account" | "verification" | "doctor" | "patient" | "specialty" | "doctorSpecialty"
+    modelProps: "admin" | "user" | "session" | "account" | "verification" | "doctor" | "patient" | "specialty" | "doctorSpecialty" | "superAdmin"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1092,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SuperAdmin: {
+      payload: Prisma.$SuperAdminPayload<ExtArgs>
+      fields: Prisma.SuperAdminFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SuperAdminFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SuperAdminFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        findFirst: {
+          args: Prisma.SuperAdminFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SuperAdminFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        findMany: {
+          args: Prisma.SuperAdminFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>[]
+        }
+        create: {
+          args: Prisma.SuperAdminCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        createMany: {
+          args: Prisma.SuperAdminCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SuperAdminCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>[]
+        }
+        delete: {
+          args: Prisma.SuperAdminDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        update: {
+          args: Prisma.SuperAdminUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        deleteMany: {
+          args: Prisma.SuperAdminDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SuperAdminUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SuperAdminUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>[]
+        }
+        upsert: {
+          args: Prisma.SuperAdminUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminPayload>
+        }
+        aggregate: {
+          args: Prisma.SuperAdminAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSuperAdmin>
+        }
+        groupBy: {
+          args: Prisma.SuperAdminGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuperAdminGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SuperAdminCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuperAdminCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1137,7 +1212,6 @@ export const AdminScalarFieldEnum = {
   profilePhoto: 'profilePhoto',
   contactNumber: 'contactNumber',
   address: 'address',
-  gender: 'gender',
   isDeleted: 'isDeleted',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
@@ -1276,6 +1350,23 @@ export const DoctorSpecialtyScalarFieldEnum = {
 export type DoctorSpecialtyScalarFieldEnum = (typeof DoctorSpecialtyScalarFieldEnum)[keyof typeof DoctorSpecialtyScalarFieldEnum]
 
 
+export const SuperAdminScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  profilePhoto: 'profilePhoto',
+  contactNumber: 'contactNumber',
+  address: 'address',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type SuperAdminScalarFieldEnum = (typeof SuperAdminScalarFieldEnum)[keyof typeof SuperAdminScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1317,20 +1408,6 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'String[]'
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
-    
-
-
-/**
- * Reference to a field of type 'Gender'
- */
-export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
-    
-
-
-/**
- * Reference to a field of type 'Gender[]'
- */
-export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
     
 
 
@@ -1394,6 +1471,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender'
+ */
+export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender[]'
+ */
+export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
     
 
 
@@ -1570,6 +1661,7 @@ export type GlobalOmitConfig = {
   patient?: Prisma.PatientOmit
   specialty?: Prisma.SpecialtyOmit
   doctorSpecialty?: Prisma.DoctorSpecialtyOmit
+  superAdmin?: Prisma.SuperAdminOmit
 }
 
 /* Types for Logging */
