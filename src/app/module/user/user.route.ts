@@ -18,7 +18,14 @@ router.post(
   "/create-admin",
   checkAuth(Role.SUPER_ADMIN),
   validateRequest(UserValidation.createAdminValidationSchema),
-  userController.createAdmin
+  userController.createAdmin,
+);
+
+router.post(
+  "/create-super-admin",
+  checkAuth(Role.SUPER_ADMIN),
+  validateRequest(UserValidation.createSuperAdminValidationSchema),
+  userController.createSuperAdmin,
 );
 
 export const userRoute = router;
