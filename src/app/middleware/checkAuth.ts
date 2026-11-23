@@ -8,7 +8,7 @@ import status from "http-status";
 import { prisma } from "../lib/prisma";
 import { envVars } from "../config/env";
 
-export const verifyRole = (...roles: Role[]) => {
+export const checkAuth = (...roles: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // session verification
