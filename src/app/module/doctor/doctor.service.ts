@@ -2,6 +2,7 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
+import { id } from "zod/locales";
 
 const getAllDoctor = async () => {
   const result = await prisma.doctor.findMany({
@@ -140,10 +141,35 @@ const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
   };
 };
 
+const softDeleteDoctor = async(id: string)=>{
+    // check if doctor exist or deleted already
+    const doctorExists = await prisma.doctor.findUnique({
+        where: {id}
+    })
 
+    if(!doctorExists){
+        throw new AppError(status.NOT_FOUND, "Doctor not found")
+    }
+
+    if(doctorExists.isDeleted){
+        throw new AppError(status.NOT_FOUND, "Doctor is already deleted")
+    }
+
+    // mark doctor as deleted
+    const result = await prisma.doctor.update({
+        where:{id},
+        data:{
+            isDeleted: true,
+            deletedAt: new Date()
+        }
+    })
+
+    return result
+}
 
 export const doctorService = {
   getAllDoctor,
   getDoctorById,
-  updateDoctor
+  updateDoctor,
+  softDeleteDoctor
 };
