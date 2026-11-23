@@ -1,6 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
+import { IUpdateDoctorPayload } from "./doctor.interface";
 
 const getAllDoctor = async () => {
   const result = await prisma.doctor.findMany({
@@ -56,7 +57,7 @@ const getDoctorById = async (id: string) => {
     include: {
       specialties: {
         include: {
-          specialty: true
+          specialty: true,
         },
       },
     },
@@ -74,7 +75,75 @@ const getDoctorById = async (id: string) => {
   return doctor;
 };
 
+const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
+  // check if doctor exist
+  const isDoctorExists = await prisma.doctor.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!isDoctorExists) {
+    throw new AppError(status.NOT_FOUND, "Doctor not found");
+  }
+
+  const { specialties, ...doctorData } = payload;
+
+  const updatedDoctor = await prisma.doctor.update({
+    where: {
+      id,
+    },
+    data: doctorData,
+    include: {
+      specialties: {
+        include: {
+          specialty: true,
+        },
+      },
+    },
+  });
+
+  // If specialties are provided, update them separately
+  if (specialties && specialties.length > 0) {
+    // Delete old Specialties
+    await prisma.doctorSpecialty.deleteMany({
+      where: { doctorId: id },
+    });
+
+    // Add new Specialties
+    const specialtiesData = specialties.map((specialtyId) => ({
+      doctorId: id,
+      specialtyId,
+    }));
+
+    await prisma.doctorSpecialty.createMany({
+      data: specialtiesData,
+    });
+  }
+
+  const result = await prisma.doctor.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      specialties: {
+        include: {
+          specialty: true,
+        },
+      },
+    },
+  });
+
+  return {
+    ...result,
+    specialties: result?.specialties.map((s) => s.specialty),
+  };
+};
+
+
+
 export const doctorService = {
   getAllDoctor,
   getDoctorById,
+  updateDoctor
 };
