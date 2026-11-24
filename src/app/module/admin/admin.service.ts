@@ -56,7 +56,7 @@ const updateAdmin = async (id: string, payload: IUpdateAdmin) => {
   });
 
   if (!isAdminExists) {
-    throw new AppError(status.NOT_FOUND, "Doctor not found");
+    throw new AppError(status.NOT_FOUND, "Admin not found");
   }
 
   const updatedAdmin = await prisma.admin.update({
