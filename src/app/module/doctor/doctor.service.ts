@@ -2,7 +2,6 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
-import { id } from "zod/locales";
 
 const getAllDoctor = async () => {
   const result = await prisma.doctor.findMany({
