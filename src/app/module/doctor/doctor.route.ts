@@ -7,7 +7,11 @@ import { doctorValidation } from "./doctor.validation";
 
 const router = Router();
 
-router.get("/", doctorController.getAllDoctor);
+router.get(
+  "/",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN, Role.DOCTOR),
+  doctorController.getAllDoctor,
+);
 router.get(
   "/:doctorId",
   checkAuth(Role.ADMIN, Role.DOCTOR, Role.SUPER_ADMIN, Role.PATIENT),

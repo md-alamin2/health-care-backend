@@ -2,6 +2,7 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateSuperAdmin } from "./superAdmin.interface";
+import { IRequestUser } from "../../interfaces/request.interface";
 
 const getAllSuperAdmin = async () => {
   const result = await prisma.superAdmin.findMany({
@@ -69,35 +70,42 @@ const updateSuperAdmin = async (id: string, payload: IUpdateSuperAdmin) => {
   return updatedSuperAdmin;
 };
 
-const softDeleteSuperAdmin = async(id: string)=>{
-    // check if super admin exist or deleted already
-    const superAdminExists = await prisma.superAdmin.findUnique({
-        where: {id}
-    })
+const softDeleteSuperAdmin = async (id: string, user: IRequestUser) => {
+  // check if super admin exist or deleted already
+  const superAdminExists = await prisma.superAdmin.findUnique({
+    where: { id },
+  });
 
-    if(!superAdminExists){
-        throw new AppError(status.NOT_FOUND, "Super admin not found")
-    }
+  if (!superAdminExists) {
+    throw new AppError(status.NOT_FOUND, "Super admin not found");
+  }
 
-    if(superAdminExists.isDeleted){
-        throw new AppError(status.NOT_FOUND, "Super admin is already deleted")
-    }
+  if (superAdminExists.isDeleted) {
+    throw new AppError(status.NOT_FOUND, "Super admin is already deleted");
+  }
 
-    // mark super admin as deleted
-    const result = await prisma.superAdmin.update({
-        where:{id},
-        data:{
-            isDeleted: true,
-            deletedAt: new Date()
-        }
-    })
+  if (superAdminExists.email === user.email) {
+    throw new AppError(
+      status.CONFLICT,
+      "Super Admin can not delete his own profile",
+    );
+  }
 
-    return result
-}
+  // mark super admin as deleted
+  const result = await prisma.superAdmin.update({
+    where: { id },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+  });
+
+  return result;
+};
 
 export const superAdminService = {
   getAllSuperAdmin,
   getSuperAdminById,
   updateSuperAdmin,
-  softDeleteSuperAdmin
+  softDeleteSuperAdmin,
 };

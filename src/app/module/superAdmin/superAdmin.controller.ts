@@ -45,6 +45,7 @@ const softDeleteSuperAdmin = catchAsync(async (req: Request, res: Response) => {
   const superAdminId = req.params.superAdminId;
   const result = await superAdminService.softDeleteSuperAdmin(
     superAdminId as string,
+    req.user
   );
   sendResponse(res, {
     httpStatusCode: status.OK,

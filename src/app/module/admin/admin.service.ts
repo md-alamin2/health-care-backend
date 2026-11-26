@@ -2,6 +2,7 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateAdmin } from "./admin.interface";
+import { IRequestUser } from "../../interfaces/request.interface";
 
 const getAllAdmin = async () => {
   const result = await prisma.admin.findMany({
@@ -69,35 +70,39 @@ const updateAdmin = async (id: string, payload: IUpdateAdmin) => {
   return updatedAdmin;
 };
 
-const softDeleteAdmin = async(id: string)=>{
-    // check if admin exist or deleted already
-    const adminExists = await prisma.admin.findUnique({
-        where: {id}
-    })
+const softDeleteAdmin = async (id: string, user: IRequestUser) => {
+  // check if admin exist or deleted already
+  const adminExists = await prisma.admin.findUnique({
+    where: { id },
+  });
 
-    if(!adminExists){
-        throw new AppError(status.NOT_FOUND, "Admin not found")
-    }
+  if (!adminExists) {
+    throw new AppError(status.NOT_FOUND, "Admin not found");
+  }
 
-    if(adminExists.isDeleted){
-        throw new AppError(status.NOT_FOUND, "Admin is already deleted")
-    }
+  if (adminExists.isDeleted) {
+    throw new AppError(status.NOT_FOUND, "Admin is already deleted");
+  }
 
-    // mark admin as deleted
-    const result = await prisma.admin.update({
-        where:{id},
-        data:{
-            isDeleted: true,
-            deletedAt: new Date()
-        }
-    })
+  if (adminExists.email === user.email) {
+    throw new AppError(status.CONFLICT, "Admin can not delete his own profile");
+  }
 
-    return result
-}
+  // mark admin as deleted
+  const result = await prisma.admin.update({
+    where: { id },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+  });
+
+  return result;
+};
 
 export const adminService = {
   getAllAdmin,
   getAdminById,
   updateAdmin,
-  softDeleteAdmin
+  softDeleteAdmin,
 };
